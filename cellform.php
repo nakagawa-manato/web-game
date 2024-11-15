@@ -5,7 +5,8 @@ require('../../../conf/dbconnect.php');
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // POSTデータからcellIdを取得
     $cellId = $_POST['cellId'] ?? '';
-
+    //POSTデータからitemidを取得
+    $itemId = $_POST['use_item_id'];
     //プレイヤーidをsessionから$idに入れる
     $pl_id = $_SESSION['id'];
 
@@ -40,6 +41,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         echo "プレイヤーIDが不明です";
     }
+
+    // アイテムを使用した処理（例：数量を減らす、またはアイテムの状態を更新）
+    $stmt = $db->prepare('UPDATE backpack SET amount = amount - 1 WHERE pl_id = ? AND item_id = ?');
+    $stmt->execute(array($pl_id, $itemId));
+
+    // アイテム使用履歴を記録
+    $filePath = "pl_log/player_" . $pl_id . ".txt";
+    $content = "アイテムID: $itemId を使用しました\n";
+    file_put_contents($filePath, $content, FILE_APPEND);
 
     $_SESSION['roop'] = 1;
     // 処理が終わったら元のHTMLにリダイレクト

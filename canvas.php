@@ -51,13 +51,9 @@ if ($pl_id !== null) {
 }
 
 try {
-    //プレイヤーIDに基づいてアイテムを参照
-    //$stmt = $db->prepare('SELECT b.item_id, b.amount, i.item_name FROM backpack b JOIN item i ON b.item_id = i.item_id WHERE b.pl_id = ?');
-    //$stmt->execute(array('player.$pl_id'));
-
+    $stmt = $db->prepare('SELECT b.item_id, b.amount, i.item_name, i.pic FROM backpack b JOIN item i ON b.item_id = i.item_id WHERE b.pl_id = ?');
+    $stmt->execute(array($pl_id));
     $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    var_dump($items);
 } catch (PDOException $e) {
     echo '接続エラー: ' . $e->getMessage();
 }
@@ -228,10 +224,17 @@ $dangerCellsJson = json_encode($dangerCells);
             <div class="inventory-cell"></div>
             <div class="inventory-cell"></div>
             <div class="inventory-cell"></div>
+
+            <!-- アイテム格子に画像を埋め込む -->
+            <?php foreach ($items as $item): ?>
+                <div class="inventory-cell" data-item-id="<?php echo htmlspecialchars($item['item_id']); ?>">
+                    <img src="./icon/<?php echo htmlspecialchars($item['pic']); ?>" alt="<?php echo htmlspecialchars($item['item_name']); ?>">
+                </div>
+            <?php endforeach; ?>
         </div>
 
-        <!-- 使用するオプションのボックス -->
-        <div id="use-item-popup" class="popup">
+        <!-- 使用するアイテムを確認するポップアップ -->
+        <div id="use-item-popup" class="popup" style="display:none;">
             <p>このアイテムを使用しますか？</p>
             <button id="use-item-btn">使用する</button>
             <button id="close-popup-btn">キャンセル</button>
@@ -317,25 +320,32 @@ $dangerCellsJson = json_encode($dangerCells);
             const useItemBtn = document.getElementById('use-item-btn');
             let selectedItemId = null;
 
+            // アイテム画像がクリックされたとき
             inventoryCells.forEach(cell => {
-                cell.addEventListener('contextmenu', (e) => {
-                    e.preventDefault();
+                cell.addEventListener('click', (e) => {
                     const itemId = cell.getAttribute('data-item-id');
-                    if (itemId) {
-                        selectedItemId = itemId;
-                        popup.style.display = 'block';
-                    }
+                    selectedItemId = itemId; // 選択されたアイテムIDを保持
+
+                    // ポップアップを表示
+                    popup.style.display = 'flex';
                 });
             });
 
+            // ポップアップのキャンセルボタンをクリックしたとき
             closePopupBtn.addEventListener('click', () => {
                 popup.style.display = 'none';
             });
 
+            // ポップアップの使用ボタンをクリックしたとき
             useItemBtn.addEventListener('click', () => {
                 if (selectedItemId) {
+                    // アイテムを使用する処理（ここにDB更新や処理を追加する）
                     alert('アイテム ' + selectedItemId + ' を使用しました');
-                    // アイテムを使用する処理（例えば、データベースに更新する等）
+
+                    // 使用したアイテムに対する処理を行う
+                    // 例：アイテムをインベントリから削除、またはDBに更新する
+
+                    // ポップアップを非表示にする
                     popup.style.display = 'none';
                 }
             });
