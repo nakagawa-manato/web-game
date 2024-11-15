@@ -63,7 +63,7 @@ try {
 }
 
 try {
-    //予測アンチ
+    //dangerエリアを登録
     $columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']; //横軸
     $rows = [1, 2, 3, 4, 5, 6, 7]; //縦軸
 
@@ -71,17 +71,26 @@ try {
     $randomY = $rows[array_rand($rows)]; //縦軸をランダムに選択
     $area = $randomX . $randomY;
 
-    var_dump($area);
-
     $stmt = $db->prepare('INSERT INTO danger (area,num) VALUE (?,0)');
     $stmt->execute(array($area));
 } catch (PDOException $e) {
     echo '接続エラー: ' . $e->getMessage();
 }
 
-//$stmt = $db->prepare('SELECT danger FROM area WHERE num = 0');
-//$stmt->execute();
-//$prediction_danger = $stmt->fetchALL();
+try {
+    //登録したdangerエリアをすべて取得
+    $stmt = $db->prepare('SELECT area FROM danger WHERE num = 0');
+    $stmt->execute();
+    $dangerAreas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    echo '接続エラー:' . $e->getMessage();
+}
+
+// 取得したエリアをJavaScript用に整形
+$dangerCells = array_map(function ($row) {
+    return $row['area'];
+}, $dangerAreas);
+$dangerCellsJson = json_encode($dangerCells);
 
 ?>
 <!DOCTYPE html>
@@ -236,6 +245,9 @@ try {
         //PHPからプレイヤーの現在座標を取得
         const playerPos = '<?php echo htmlspecialchars($playerPos); ?>';
 
+        // PHPから取得したランダムに登録された危険なエリアをJavaScriptに渡す
+        const dangerCells = <?php echo $dangerCellsJson; ?>;
+
         //プレイヤーの現在座標を横（A-H）と縦（1-7）に分ける
         const currentX = playerPos.charAt(0); //横
         const currentY = parseInt(playerPos.charAt(1)); //縦
@@ -273,6 +285,13 @@ try {
 
         //プレイヤーがいる座標を黄色に変更
         document.getElementById(playerPos).classList.add('highlight');
+
+        // 取得した危険なエリアに基づいて赤色に変更
+        cells.forEach(cell => {
+            if (dangerCells.includes(cell.id)) {
+                cell.style.backgroundColor = 'red'; // 赤色に変更
+            }
+        });
 
         //すべてのセルにクリック可能な状態を適用
         cells.forEach(cell => {
