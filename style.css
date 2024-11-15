@@ -1,0 +1,137 @@
+/*  全体設定 */
+body {
+    align-items: flex-start;
+    height: 100vh;
+    width: 90%;
+    max-width: 1200px;
+    /* 最大幅を指定 */
+    margin-top: 20px;
+    /* 上部の余白 */
+    background-color: #f0f0f0;
+    font-family: Arial, sans-serif;
+}
+
+/* コンテナ */
+.container {
+    display: flex;
+    /* 横並び */
+    justify-content: space-between;
+    /* 配置の間隔 */
+    gap: 20px;
+    /* 要素間の隙間を追加 */
+    align-items: flex-start;
+    /* 上揃え */
+    margin: 0 auto;
+    /* センタリング */
+    width: 100%;
+    /* 画面幅全体を使用 */
+}
+
+/*  盤面設定 */
+.board {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(7, 1fr);
+    gap: 1px;
+    width: 400px;
+    /* 盤面の幅 */
+    height: 350px;
+    /* 盤面の高さ */
+    border: 1px solid white;
+    flex-grow: 1;
+    /* ボードを中央に配置するための拡張 */
+}
+
+/*  各セル設定 */
+.cell {
+    background-color: green;
+    /* マスの色 */
+    border: 1px solid white;
+    /* 各マスの線の色 */
+}
+
+/* 移動可能なセルに光らせる効果 */
+.cell.moveable {
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    background-color: lightgreen;
+    /* 移動可能セルの色 */
+    box-shadow: 0 0 10px 2px rgba(0, 255, 0, 0.5);
+    /* 輝く効果 */
+}
+
+/* プレイヤーの座標を黄色に変更 */
+.cell.highlight {
+    background-color: yellow;
+    /* プレイヤーがいるセルの色 */
+}
+
+/*  ログ表示エリア */
+.log {
+    width: 300px;
+    /* ログエリアの幅 */
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/*  ログエリア見出し */
+.log h2 {
+    margin-top: 0;
+}
+
+/*  ログ各項目 */
+.log p {
+    margin-bottom: 5px;
+}
+
+h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+/* インベントリの格子レイアウト */
+.inventory {
+    display: grid;
+    grid-template-columns: repeat(7, 60px);
+    /* 7列 */
+    grid-template-rows: repeat(12, 60px);
+    /* 12行 */
+    gap: 3px;
+    /* マス目間の隙間 */
+    justify-content: center;
+    /* 横方向の中央揃え */
+    margin: 0 auto;
+    width: 250px;
+    /* インベントリの幅 */
+    flex-shrink: 0;
+    /* 横幅を縮小しない */
+}
+
+/* 各インベントリセル */
+.inventory-cell {
+    width: 60px;
+    height: 60px;
+    border: 1px solid #ccc;
+    /* セルの境界線 */
+    display: flex;
+    align-items: center;
+    /* 縦方向の中央揃え */
+    justify-content: center;
+    /* 横方向の中央揃え */
+    background-color: #f9f9f9;
+    cursor: pointer;
+}
+
+.inventory-cell:hover {
+    background-color: #e0e0e0;
+    /* ホバー時の背景色 */
+}
+
+/* アイテム画像の最大サイズ設定 */
+.inventory-cell img {
+    max-width: 80%;
+    max-height: 80%;
+}
