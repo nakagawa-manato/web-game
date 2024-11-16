@@ -5,6 +5,8 @@ require('../../../conf/dbconnect.php');
 date_default_timezone_set('Asia/Tokyo');
 $time = date("H:i:s");
 
+echo $time;
+
 
 //プレイヤーidをセッションから取得
 $pl_id = $_SESSION['id'] ?? null;
