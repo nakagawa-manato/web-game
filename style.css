@@ -178,3 +178,38 @@ button#use-item-btn {
     background-color: #4CAF50;
     color: white;
 }
+
+.attack-button {
+    background-color: #ff5733;
+    /* 鮮やかなオレンジ色 */
+    color: white;
+    /* 白い文字 */
+    font-size: 18px;
+    /* フォントサイズ */
+    font-weight: bold;
+    /* 太字 */
+    padding: 15px 30px;
+    /* ボタンの余白 */
+    border-radius: 50px;
+    /* 丸い角 */
+    border: none;
+    /* 枠線なし */
+    cursor: pointer;
+    /* マウスオーバー時にカーソルが変わる */
+    transition: all 0.3s ease;
+    /* アニメーション効果 */
+}
+
+.attack-button:hover {
+    background-color: #e74c3c;
+    /* マウスオーバー時の色 */
+    transform: scale(1.1);
+    /* ホバー時にボタンが少し大きくなる */
+}
+
+.attack-button:active {
+    background-color: #c0392b;
+    /* クリック時の色 */
+    transform: scale(0.95);
+    /* クリック時に少し小さくなる */
+}
