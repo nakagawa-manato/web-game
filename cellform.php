@@ -10,6 +10,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     //プレイヤーidをsessionから$idに入れる
     $pl_id = $_SESSION['id'];
 
+    $raw = file_get_contents('php://input'); // POSTされた生のデータを受け取る
+    $data = json_decode($raw); // json形式をphp変数に変換
+
+    $itemId = $data;
+
     //セルidがあるかつ、pl_idがnullではないときにposをupdateする
     if ($cellId) {
         if ($pl_id !== null) {
@@ -41,15 +46,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         echo "プレイヤーIDが不明です";
     }
+    if (isset($itemId)) {
+        // アイテムを使用した処理（例：数量を減らす）
+        $stmt = $db->prepare('UPDATE backpack SET amount = amount - 1 WHERE pl_id = ? AND item_id = ?');
+        $stmt->execute(array($pl_id, $itemId));
 
-    // アイテムを使用した処理（例：数量を減らす、またはアイテムの状態を更新）
-    $stmt = $db->prepare('UPDATE backpack SET amount = amount - 1 WHERE pl_id = ? AND item_id = ?');
-    $stmt->execute(array($pl_id, $itemId));
+        // アイテム使用履歴を記録
+        $filePath = "pl_log/player_" . $pl_id . ".txt";
+        $content = "アイテムID: $itemId を使用しました\n";
 
-    // アイテム使用履歴を記録
-    $filePath = "pl_log/player_" . $pl_id . ".txt";
-    $content = "アイテムID: $itemId を使用しました\n";
-    file_put_contents($filePath, $content, FILE_APPEND);
+        $fileHandle = fopen($filePath, 'a'); //aは上書き保存
+
+        if ($fileHandle) {
+            //ファイルに内容を書き込む
+            fwrite($fileHandle, $content);
+            fclose($fileHandle);
+        } else {
+            echo "ファイルの書き込みに失敗しました";
+        }
+
+        //包帯使用時にpl_hpを+15
+        if($itemId = 6) {
+            $stmt = $db->prepare('UPDATE player SET pl_hp = pl_hp + 15 WHERE pl_id = ?');
+            $stmt->execute(array($pl_id));
+        }
+
+        //pl_hpを取得
+        $stmt = $db->prepare('SELECT pl_hp FROM player WHERE pl_id = ?');
+        $stmt->execute(array($pl_id));
+        $pl_hp = $stmt->fetch();
+
+        //pl_hpが100以上の場合100に設定
+        if($pl_hp > 100) {
+            $pl_hp = 100;
+        }
+    }
 
     $_SESSION['roop'] = 1;
     // 処理が終わったら元のHTMLにリダイレクト

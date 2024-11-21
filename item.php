@@ -22,6 +22,9 @@ $stmt = $db->prepare('INSERT INTO backpack SET item_id=?,pl_id=?,amount=?');
 $usersArray = $stmt->fetchALL();
 $stmt->execute(array(6, $pl_id, 3));
 
+$stmt = $db->prepare('UPDATE player SET pl_hp = ? WHERE pl_id = ?');
+$stmt->execute(array('100',$pl_id));
+
 header('Location: canvas.php');
 exit;
 ?>

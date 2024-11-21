@@ -11,6 +11,9 @@ echo $time;
 //プレイヤーidをセッションから取得
 $pl_id = $_SESSION['id'] ?? null;
 
+var_dump($pl_id);
+
+
 //デバッグ
 //var_dump($playerPos);
 
@@ -20,7 +23,7 @@ $pl_pos->execute(array($pl_id));
 $playerPos = $pl_pos->fetch(); //プレイヤーの座標
 $playerPos = $playerPos['pos'];
 
-//var_dump($playerPos);
+var_dump($playerPos);
 
 if (!isset($_SESSION['roop'])) {
     // プレイヤーの座標がまだ設定されていない場合、ランダムな座標を設定
@@ -53,9 +56,10 @@ if ($pl_id !== null) {
 }
 
 try {
-    $stmt = $db->prepare('SELECT b.item_id, b.amount, i.item_name, i.pic FROM backpack b JOIN item i ON b.item_id = i.item_id WHERE b.pl_id = ?');
+    $stmt = $db->prepare('SELECT b.item_id, b.amount, i.item_name, i.item_ico FROM backpack b JOIN item i ON b.item_id = i.item_id WHERE b.pl_id = ?');
     $stmt->execute(array($pl_id));
     $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    var_dump($items);
 } catch (PDOException $e) {
     echo '接続エラー: ' . $e->getMessage();
 }
@@ -98,7 +102,7 @@ $dangerCellsJson = json_encode($dangerCells);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta http-equiv="refresh" content="30; URL=http://gameg.s322.xrea.com/s2g3/game/canvas.php">
+    <meta http-equiv="refresh" content="100; URL=http://gameg.s322.xrea.com/s2g3/game/canvas.php">
     <title>タイトル</title>
     <link rel="stylesheet" href="reset.css">
     <link rel="stylesheet" href="style.css">
@@ -230,7 +234,7 @@ $dangerCellsJson = json_encode($dangerCells);
             <!-- アイテム格子に画像を埋め込む -->
             <?php foreach ($items as $item): ?>
                 <div class="inventory-cell" data-item-id="<?php echo htmlspecialchars($item['item_id']); ?>">
-                    <img src="./icon/<?php echo htmlspecialchars($item['pic']); ?>" alt="<?php echo htmlspecialchars($item['item_name']); ?>">
+                    <img src="<?php echo htmlspecialchars($item['item_ico']); ?>" alt="<?php echo htmlspecialchars($item['item_name']); ?>">
                 </div>
             <?php endforeach; ?>
         </div>
@@ -343,7 +347,19 @@ $dangerCellsJson = json_encode($dangerCells);
                 if (selectedItemId) {
                     // アイテムを使用する処理（ここにDB更新や処理を追加する）
                     alert('アイテム ' + selectedItemId + ' を使用しました');
+                    
+                    //cellfrom.phpにuse_item_idをpostで送信
+                    const param = {
+                        use_item_id: selectedItemId
+                    };
 
+                    fetch('cellform.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'use_item/json'
+                        }, // jsonを指定
+                        body: JSON.stringify(param) // json形式に変換して添付
+                    })
                     // 使用したアイテムに対する処理を行う
                     // 例：アイテムをインベントリから削除、またはDBに更新する
 
