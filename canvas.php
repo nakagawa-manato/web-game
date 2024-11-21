@@ -23,21 +23,7 @@ $pl_pos->execute(array($pl_id));
 $playerPos = $pl_pos->fetch(); //プレイヤーの座標
 $playerPos = $playerPos['pos'];
 
-var_dump($playerPos);
-
-if (!isset($_SESSION['roop'])) {
-    // プレイヤーの座標がまだ設定されていない場合、ランダムな座標を設定
-    $columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']; //横軸
-    $rows = [1, 2, 3, 4, 5, 6, 7]; //縦軸
-
-    $randomX = $columns[array_rand($columns)]; //横軸をランダムに選択
-    $randomY = $rows[array_rand($rows)]; //縦軸をランダムに選択
-    $playerPos = $randomX . $randomY;
-
-    //ランダムな座標をデータベースに登録
-    $stmt = $db->prepare('UPDATE player SET pos = ? WHERE pl_id = ?');
-    $stmt->execute(array($playerPos, $pl_id));
-}
+//var_dump($playerPos);
 
 if ($pl_id !== null) {
     //プレイヤーごとのテキストファイルパスを設定
@@ -63,6 +49,20 @@ try {
 } catch (PDOException $e) {
     echo '接続エラー: ' . $e->getMessage();
 }
+
+// 隣接するプレイヤーの位置を取得
+$adjacentPlayers = [];
+$stmt = $db->prepare('SELECT pl_id, pos FROM player WHERE pl_id != ?');
+$stmt->execute([$pl_id]);
+$players = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+foreach ($players as $player) {
+    $otherPlayerPos = $player['pos'];
+    $adjacentPlayers[] = $otherPlayerPos; // プレイヤー位置を追加
+}
+
+// 攻撃ボタンの表示
+$canAttack = in_array($playerPos, $adjacentPlayers); // 隣接しているプレイヤーがいる場合
 
 try {
     //dangerエリアを登録
@@ -246,7 +246,12 @@ $dangerCellsJson = json_encode($dangerCells);
             <button id="close-popup-btn">キャンセル</button>
         </div>
 
-
+        <?php if ($canAttack): ?>
+            <!-- 攻撃ボタンの表示 -->
+            <form action="attack.php" method="POST">
+                <input type="submit" name="attack" value="攻撃" class="attack-button">
+            </form>
+        <?php endif; ?>
 
     </div>
 
@@ -298,7 +303,9 @@ $dangerCellsJson = json_encode($dangerCells);
         // 取得した危険なエリアに基づいて赤色に変更
         cells.forEach(cell => {
             if (dangerCells.includes(cell.id)) {
-                cell.style.backgroundColor = 'red'; // 赤色に変更
+                cell.style.background = 'linear-gradient(45deg, orange 25%, transparent 25%) 0 0, linear-gradient(-45deg, orange 25%, transparent 25%) 0 0';
+                cell.style.backgroundSize = '10px 10px'; // 斜線の間隔
+                cell.style.backgroundRepeat = 'repeat'; // 斜線が繰り返される
             }
         });
 
@@ -332,8 +339,10 @@ $dangerCellsJson = json_encode($dangerCells);
                     const itemId = cell.getAttribute('data-item-id');
                     selectedItemId = itemId; // 選択されたアイテムIDを保持
 
-                    // ポップアップを表示
-                    popup.style.display = 'flex';
+                    // アイテムIDが6の場合のみポップアップを表示
+                    if (selectedItemId == 6) {
+                        popup.style.display = 'flex';
+                    }
                 });
             });
 
@@ -347,7 +356,7 @@ $dangerCellsJson = json_encode($dangerCells);
                 if (selectedItemId) {
                     // アイテムを使用する処理（ここにDB更新や処理を追加する）
                     alert('アイテム ' + selectedItemId + ' を使用しました');
-                    
+
                     //cellfrom.phpにuse_item_idをpostで送信
                     const param = {
                         use_item_id: selectedItemId

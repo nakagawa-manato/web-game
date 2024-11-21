@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         //包帯使用時にpl_hpを+15
-        if($itemId = 6) {
+        if ($itemId = 6) {
             $stmt = $db->prepare('UPDATE player SET pl_hp = pl_hp + 15 WHERE pl_id = ?');
             $stmt->execute(array($pl_id));
         }
@@ -77,12 +77,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $pl_hp = $stmt->fetch();
 
         //pl_hpが100以上の場合100に設定
-        if($pl_hp > 100) {
+        if ($pl_hp > 100) {
             $pl_hp = 100;
         }
     }
 
-    $_SESSION['roop'] = 1;
     // 処理が終わったら元のHTMLにリダイレクト
     header("Location:canvas.php");
     exit(); // スクリプトを終了
